@@ -1,7 +1,10 @@
-# Shoe_inventory
+# notes-tak22
 
-This is a simple application built with Vue and Express. It uses plain json array to store data.
-It allows you to keep track of your shoe inventory. You can add, update, delete and view your shoes.
+This is a simple notes app built with Vue and Express. It uses plain json array to store notes.
+
+## Project management
+
+[https://www.pivotaltracker.com/n/projects/2632252](https://www.pivotaltracker.com/n/projects/2632252)
 
 ## Project setup
 
@@ -14,10 +17,10 @@ npm install
 ```
 
 ### Running the app
+
 ```
 npm start
 ```
-
 
 ## License
 
@@ -29,5 +32,5 @@ npm start
 * [Express](https://expressjs.com/)
 * [bcrypt](https://www.npmjs.com/package/bcrypt)
 * [dotenv](https://www.npmjs.com/package/dotenv)
-* [yamljs](https://www.npmjs.com/package/yamljs)
+* [yamlJs](https://www.npmjs.com/package/yamljs)
 * [swagger-ui-express](https://www.npmjs.com/package/swagger-ui-express)

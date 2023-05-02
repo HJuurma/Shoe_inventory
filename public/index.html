@@ -5,131 +5,465 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
     <meta name="description" content=""/>
     <meta name="author" content=""/>
+
     <title>Shoe collection tracker</title>
 
-    <script src="https://use.fontawesome.com/releases/v5.15.4/js/all.js" crossorigin="anonymous"></script>
-
+    <!-- Core theme CSS (includes Bootstrap)-->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
           integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
 
-    <link rel="apple-touch-icon" sizes="180x180" href="/icons/favicon_package_v0.16/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon_package_v0.16/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon_package_v0.16/favicon-16x16.png">
-    <link rel="manifest" href="/icons/favicon_package_v0.16/site.webmanifest">
-    <link rel="mask-icon" href="/icons/favicon_package_v0.16/safari-pinned-tab.svg" color="#5bbad5">
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicon_package_v0.16/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon_package_v0.16/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon_package_v0.16/favicon-16x16.png">
+    <link rel="manifest" href="/favicon_package_v0.16/site.webmanifest">
+    <link rel="mask-icon" href="/favicon_package_v0.16/safari-pinned-tab.svg" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="theme-color" content="#ffffff">
 
+    <style>
+
+        #shoe-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-gap: 1rem;
+            grid-auto-rows: minmax(100px, auto);
+        }
+
+        .shoe-card {
+            background-color: lightgrey;
+            border: 1px solid black;
+            border-radius: .25rem;
+            padding: 1rem;
+            font-family: "Adelle Sans Devanagari", sans-serif;
+        }
+
+        .shoe-card:hover {
+            background-color: darkgray;
+            color: white;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            font-family: "Adelle Sans Devanagari", sans-serif;
+        }
+
+
+    </style>
 </head>
 <body>
 
-
-<!-- Page content-->
 <div id="app">
 
+    <!-- Page content-->
     <div class="container">
-        <div class="text-center mt-5">
-            <h1>Shoe collection tracker</h1>
-            <p class="lead">A simple application to keep track of your shoe collection.</p>
-            <div class="row">
-                <button type="button" class="btn btn-primary btn-dark" data-bs-toggle="modal"
-                        @click="showRegisterModal">
-                    Register
+        <div class=" text-center mt-5">
+            <h1>SHOE COLLECTION TRACKER</h1>
+            <p><i>A simple application to keep track of your shoe collection.</i></p>
+
+            <div class="column">
+                <button type="button" class="btn btn-primary bg-dark" data-bs-toggle="modal" v-if="!sessionId"
+                        @click="showModal('signUpModal')">
+                    SignUp
                 </button>
+                &nbsp;
+                <button type="button" class="btn btn-primary bg-dark" data-bs-toggle="modal" v-if="!sessionId"
+                        @click="showModal('signInModal')">
+                    Sign In
+                </button>
+
+                <button type="button" class="btn btn-primary bg-dark" data-bs-toggle="modal" v-if="sessionId"
+                        @click="signOut">
+                    Sign Out
+                </button>
+                &nbsp;
+                <button type="button" class="btn btn-primary bg-dark" data-bs-toggle="modal" v-if="sessionId"
+                        @click="showModal('addShoeModal')">
+                    Add shoe
+                </button>
+            </div>
+
+            &nbsp;
+
+            <!-- List of shoes -->
+            <div id="shoe-list">
+                <div v-for="shoe in shoes" class="shoe-card">
+                    {{ shoe.title }}<br>
+                    {{ shoe.brand }}<br>
+                    {{ shoe.sizes }}<br>
+                    {{ shoe.content }}<br>
+                    <!-- Display uploaded image
+                     <img :src="shoe.image" alt="Uploaded Image" width="100" height="100">-->
+
+                    <!-- Delete a shoe -->
+                    <button type="button" aria-label="Delete" class="btn btn-primary bg-dark btn-sm" data-bs-toggle="modal"
+                            @click="deleteShoe(shoe.id)" style="float: right">Delete
+                    </button>
+
+                </div>
             </div>
         </div>
     </div>
 
-
-    <!-- Modal -->
-    <div class="modal fade" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+    <!-- Sign Up Modal -->
+    <div class="modal fade" id="signUpModal" tabindex="-1" aria-labelledby="signUpModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="registerModalLabel">Register</h5>
+                    <h1 class="modal-title fs-5" id="signUpModalLabel">Sign Up</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form>
-                        <div class="mb-3">
-                            <label for="exampleInputEmail1" class="form-label">Email address</label>
-                            <input type="email" class="form-control" id="exampleInputEmail1" v-model="registerEmail"
-                                   aria-describedby="emailHelp">
+                    <div class="mb-3 row">
+                        <label for="signUpEmail" class="col-sm-2 col-form-label">Email</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="signUpEmail" v-model="signUpEmail">
                         </div>
-                        <div class="mb-3">
-                            <label for="inputPassword1" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="inputPassword1" v-model="registerPassword">
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="signUpPassword" class="col-sm-2 col-form-label">Password</label>
+                        <div class="col-sm-10">
+                            <input type="password" class="form-control" id="signUpPassword" v-model="signUpPassword">
                         </div>
-
-                    </form>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" @click="register">Register</button>
+                    <button type="button" class="btn btn-primary bg-dark " @click="signUp">Sign Up</button>
                 </div>
             </div>
         </div>
     </div>
-</div>
 
+    <!-- Sign In Modal -->
+    <div class="modal fade" id="signInModal" tabindex="-1" aria-labelledby="signInModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="signInModalLabel">Sign In</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 row">
+                        <label for="signInEmail" class="col-sm-2 col-form-label">Email</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="signInEmail" v-model="signInEmail">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="signInPassword" class="col-sm-2 col-form-label">Password</label>
+                        <div class="col-sm-10">
+                            <input type="password" class="form-control" id="signInPassword" v-model="signInPassword">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary bg-dark" @click="signIn">Sign In</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Shoe Modal -->
+    <div class="modal fade" id="addShoeModal" tabindex="-1" aria-labelledby="signInModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5">Add Shoe</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 row">
+                        <label for="addShoeTitle" class="col-sm-2 col-form-label">Title</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="addShoeTitle" v-model="addShoeTitle">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="addShoeBrand" class="col-sm-2 col-form-label">Brand</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="addShoeBrand" v-model="addShoeBrand">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="addShoeSizes" class="col-sm-2 col-form-label">Size</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="addShoeSizes" v-model="addShoeSizes">
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="addShoeContent" class="col-sm-2 col-form-label">Comments</label>
+                        <div class="col-sm-10">
+                            <textarea class="form-control" id="addShoeContent" v-model="addShoeContent"></textarea>
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="addShoeImage" class="col-sm-2 col-form-label">Image</label>
+                        <div class="col-sm-10">
+                            <!--   <textarea class="form-control" v-model="addShoeImage"></textarea>
+
+                                <input type="file" id="addShoeImage" name="addShoeImage" accept="image/*" @change="onFileChange">
+                                <img :src="addShoeImage" alt="image" width="200" height="200">-->
+
+                            <form action="/upload" id="addShoeImage" method="POST" enctype="multipart/form-data">
+                                <input type="file" name="image"/>
+                            </form>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" @click="addShoe">Add Shoe</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
 <script>
-    const {createApp} = Vue
 
-    createApp({
+    const form = document.getElementById('addShoeImage');
+    const img = document.getElementById('uploadedImage');
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault(); // prevent the form from submitting normally
+
+        // Create a FormData object and append the file input element to it
+        const formData = new FormData(form);
+        const fileInput = document.querySelector('input[type="file"]');
+        formData.append('image', fileInput.files[0]);
+
+        // Send a POST request to the server to upload the image
+        fetch('/upload', {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                if (response.ok) {
+                    // If the upload was successful, update the <img> tag to display the uploaded image
+                    img.src = '/upload/' + fileInput.files[0].name;
+                } else {
+                    console.log('Upload failed:', response.status);
+                }
+            })
+            .catch(error => {
+                console.error('Error uploading image:', error);
+            });
+    });
+
+    function tryToParseJSON(jsonString) {
+        try {
+            const o = JSON.parse(jsonString)
+            if (o && typeof o === 'object') {
+                return o
+            }
+        } catch (e) {
+        }
+        return false
+    }
+
+
+    const {createApp, ref, computed} = Vue;
+    const app = createApp({
         data() {
             return {
                 modalHandler: null,
-                registerEmail: null,
-                registerPassword: null
+                signUpEmail: null,
+                signUpPassword: null,
+                signInEmail: null,
+                signInPassword: null,
+                sessionId: null,
+                shoes: null,
+                addShoeTitle: null,
+                addShoeBrand: null,
+                addShoeSizes: null,
+                addShoeContent: null,
+                addShoeImage: null,
             }
         },
+        mounted() {
+            // Check if the user is already logged in from local storage
+            this.sessionId = localStorage.getItem('sessionId')
 
+            // If the user is logged in, get the shoes
+            if (this.sessionId) {
+                this.getShoes
+                ()
+            }
 
+        },
         methods: {
-            showRegisterModal() {
-                this.modalHandler = new bootstrap.Modal(document.getElementById('registerModal'), {
+
+            getShoes
+                () {
+                this.send('GET', '/shoes').then(response => {
+                    if (response.ok) {
+                        this.shoes = response.body
+                    }
+                })
+            },
+            showModal: function (modalId) {
+                this.modalHandler = new bootstrap.Modal(document.getElementById(modalId), {
                     keyboard: false
                 })
                 this.modalHandler.show()
             },
+            send: function (method, url, body) {
+                const vue = this;
 
-            send: async function (method, url, body) {
-                await fetch(url, {
-                    method,
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                async function CheckError(response) {
+                    if (response.status >= 200 && response.status <= 299) {
+                        let responseText = await response.text()
+                        return {ok: true, status: response.status, body: tryToParseJSON(responseText)}
+                    } else {
+                        let responseText = await response.text()
+                        let responseObject = tryToParseJSON(responseText)
+                        if (typeof responseObject === 'object' && typeof responseObject.error === 'string') {
+                            alert('Error code ' + response.status + ":\n" + responseObject.error)
+                        } else {
+                            alert('Error code ' + response.status + ":\n" + responseText)
+                        }
+                        if (response.status === 401) {
+                            vue.clearStorageAndResetSessionId();
+                        }
+                        return {ok: false, status: response.status, body: responseObject || responseText}
+                    }
+                }
+
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                if (this.sessionId) {
+                    headers.Authorization = "Bearer " + this.sessionId;
+                }
+                return fetch(url, {
+                    method: method,
+                    headers,
                     body: JSON.stringify(body)
-                }).then(async res => {
-                    return {body: await res.text(), status: res.status}
-                }).then(res => {
-                    if (res.status >= 299) {
-                        alert('Error' + res.status + ' ' + res.body)
-                        console.log(100)
-                        throw new Error('Error' + res.status + ': ' + res.body)
+                })
+                    .then(CheckError)
+                    .then((jsonResponse) => {
+                        return jsonResponse
+                    }).catch((error) => {
+                        throw Error('Network error: ' + error);
+                    });
+            },
+            signUp: async function () {
+                // Send POST /users
+                const email = this.signUpEmail
+                const password = this.signUpPassword
+                const response = await this.send('POST', '/users', {email, password});
+                if (response.ok) {
+                    alert('User created')
+                    this.modalHandler.hide()
+                }
+
+            },
+            signIn: async function () {
+                // Send POST /sessions
+                const email = this.signInEmail
+                const password = this.signInPassword
+                const response = await this.send('POST', '/sessions', {email, password});
+                if (response.ok) {
+
+                    // Store the token in localStorage
+                    localStorage.setItem('sessionId', response.body.id)
+
+                    // Sign in the user
+                    this.sessionId = response.body.id
+
+                    // Close the modal
+                    this.modalHandler.hide()
+
+                    // Get the shoes
+                    this.getShoes
+                    ()
+
+                }
+            },
+            signOut: async function () {
+                // Send DELETE /sessions
+
+                const response = await this.send('DELETE', '/sessions');
+                if (response.ok) {
+                    this.clearStorageAndResetSessionId()
+                }
+
+            },
+            clearStorageAndResetSessionId: function () {
+                localStorage.removeItem('sessionId')
+                this.sessionId = null
+                this.shoes = null
+            },
+            addShoe: function () {
+
+                // Validate the form
+                if (!this.addShoeTitle) {
+                    alert('Please enter a title')
+                    return
+                }
+                if (!this.addShoeContent) {
+                    alert('Please enter some content')
+                    return
+                }
+                if (!this.addShoeBrand) {
+                    alert('Please enter some content')
+                    return
+                }
+                if (!this.addShoeSizes) {
+                    alert('Please enter some content')
+                    return
+                }
+                // Validate that the content string is not too long
+                if (this.addShoeContent.length > 100) {
+                    alert('Content is too long')
+                    return
+                }
+
+
+                // Send POST /shoes
+                const title = this.addShoeTitle
+                const content = this.addShoeContent
+                const brand = this.addShoeBrand
+                const sizes = this.addShoeSizes
+                const image = this.addShoeImage
+
+
+                this.send('POST', '/shoes', {title, content, brand, sizes, image}).then(response => {
+                    if (response.ok) {
+                        alert('Shoe added')
+                        this.shoes.push(response.body)
+                        this.modalHandler.hide()
                     }
                 })
             },
 
-            register: async function () {
-                const email = this.registerEmail
-                const password = this.registerPassword
-                try {
-                    await this.send('POST', '/users', {email, password})
-                    alert('User created')
-                    this.modalHandler.hide()
-                } catch (e) {
-                    console.log(e)
-                }
-            }
+            // function to delete shoes from the database
+            deleteShoe: function (shoeId) {
+                // Send DELETE /shoes/:id
+                this.send('DELETE', '/shoes/' + shoeId).then(response => {
+                    if (response.ok) {
+                        alert('Shoe deleted')
+                        this.shoes = this.shoes.filter(shoe => shoe.id !== shoeId)
+                    }
+                })
+            },
+
         }
-    }).mount('#app')
+    });
+    app.mount('#app');
+
 </script>
 
 <!-- Bootstrap core JS-->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.min.js"
+        integrity="sha384-cuYeSxntonz0PPNlHhBs68uyIAVpIIOZZ5JqeqvYYIcEL727kskC66kF92t6Xl2V"
+        crossorigin="anonymous"></script>
 
 </body>
 </html>
