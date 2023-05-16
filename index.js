@@ -22,15 +22,16 @@ app.use(
 );
 app.use(express.static('public'))
 app.use(express.json())
+app.use('/upload', express.static('/upload'))
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
     next();
 });
 
 const users = [
-    {id: 1, email: 'admin', password: '$2b$10$0EfA6fMFRDVQWzU0WR1dmelPA7.qSp7ZYJAgneGsy2ikQltX2Duey'} // KollneKollne
+    {id: 1, email: 'admin', password: '$2b$10$0EfA6fMFRDVQWzU0WR1dmelPA7.qSp7ZYJAgneGsy2ikQltX2Duey'}
 ]
 
 let shoes
@@ -56,14 +57,11 @@ let shoes
         content: 'This is the content of shoe 3',
         userId: 1
     }
-
 ]
-
 
 let sessions = [
     {id: '123', userId: 1}
 ]
-
 
 function tryToParseJson(jsonString) {
     try {
@@ -116,7 +114,6 @@ app.post('/users', async (req, res) => {
     users.push({id: maxId + 1, email: req.body.email, password: hashedPassword})
 
     res.status(201).end()
-
 })
 
 // POST /sessions
@@ -149,9 +146,7 @@ app.post('/sessions', async (req, res) => {
         console.error(error);
         res.status(500).send('Internal server error')
     }
-
 })
-
 
 function authorizeRequest(req, res, next) {
     // Check that there is an authorization header
@@ -180,7 +175,6 @@ function authorizeRequest(req, res, next) {
 
     // Call next middleware
     next()
-
 }
 
 app.get('/shoes' + '', authorizeRequest, (req, res) => {
@@ -205,11 +199,10 @@ app.delete('/sessions', authorizeRequest, (req, res) => {
 
 })
 
-
 app.post('/shoes' + '', authorizeRequest, (req, res) => {
 
     // Validate title and content
-    if (!req.body.title || !req.body.content || !req.body.brand || !req.body.sizes ) return res.status(400).send('Title and content are required')
+    if (!req.body.title || !req.body.content || !req.body.brand || !req.body.sizes) return res.status(400).send('Title and content are required')
 
     // Find max id
     const maxId = shoes
@@ -218,7 +211,15 @@ app.post('/shoes' + '', authorizeRequest, (req, res) => {
 
     // Save shoe to database
     shoes
-        .push({id: maxId + 1, title: req.body.title, content: req.body.content, brand: req.body.brand, sizes: req.body.sizes, image: req.body.image, userId: req.user.id})
+        .push({
+            id: maxId + 1,
+            title: req.body.title,
+            content: req.body.content,
+            brand: req.body.brand,
+            sizes: req.body.sizes,
+            image: req.body.image,
+            userId: req.user.id
+        })
 
     // Send shoe to client
     res.status(201).send(shoes
@@ -226,23 +227,27 @@ app.post('/shoes' + '', authorizeRequest, (req, res) => {
 
 })
 
+// app post image to upload
 app.post('/upload', (req, res) => {
     // Get the file that was set to our field named "image"
-    const { image } = req.files;
+    const {image} = req.files;
 
     // If no image submitted, exit
     if (!image) return res.sendStatus(400);
 
+    if (!/^image/.test(image.mimetype)) return res.sendStatus(400);
 
-    if (/^image/.test(image.mimetype)) return res.sendStatus(400);
 
     // Move the uploaded image to our upload folder
     image.mv(__dirname + '/upload/' + image.name);
 
     // All good
     res.sendStatus(200);
-});
 
+    //console log that uploaded image from uploads folder
+    console.log(__dirname + '/upload/' + image.name);
+
+});
 
 // app delete shoe from database
 app.delete('/shoes/:id', authorizeRequest, (req, res) => {

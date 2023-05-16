@@ -1,10 +1,10 @@
-# notes-tak22
+# Shoe_inventory
 
-This is a simple notes app built with Vue and Express. It uses plain json array to store notes.
+This is a simple shoe inventory app built with Vue and Express. It uses plain json array to store notes.
 
 ## Project management
 
-[https://www.pivotaltracker.com/n/projects/2632252](https://www.pivotaltracker.com/n/projects/2632252)
+[https://www.pivotaltracker.com/n/projects/2632927]
 
 ## Project setup
 
