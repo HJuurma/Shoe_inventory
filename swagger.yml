@@ -1,6 +1,6 @@
 openapi: 3.0.2
 info:
-  title: tak22-shoes
+  title: Shoe_inventory
 
   version: 1.0.0
 paths:
@@ -270,6 +270,27 @@ components:
     Bearer:
       scheme: bearer
       type: http
+
+  /upload:
+    post:
+      summary: Uploads a file
+      operationId: uploadFile
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: File uploaded successfully
+        '400':
+          description: Bad request - no image provided or invalid image type
+          
 tags:
   -
     name: /users
@@ -280,4 +301,8 @@ tags:
   -
     name: /shoes
     description: ''
+  -
+    name: /upload
+    description: ''
+   
 
