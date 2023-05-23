@@ -1,6 +1,6 @@
 openapi: 3.0.2
 info:
-  title: tak22-shoes
+  title: Shoe_inventory
 
   version: 1.0.0
 paths:
@@ -270,6 +270,7 @@ components:
     Bearer:
       scheme: bearer
       type: http
+
 tags:
   -
     name: /users
@@ -280,4 +281,6 @@ tags:
   -
     name: /shoes
     description: ''
+
+
 

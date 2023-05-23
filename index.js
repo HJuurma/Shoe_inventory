@@ -10,6 +10,7 @@ const fileUpload = require('express-fileupload');
 // Add Swagger UI
 const swaggerUi = require('swagger-ui-express');
 const yamlJs = require('yamljs');
+const { readFileSync } = require('fs');
 const swaggerDocument = yamlJs.load('./swagger.yml');
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use(
@@ -21,8 +22,7 @@ app.use(
     })
 );
 app.use(express.static('public'))
-app.use(express.json())
-app.use('/upload', express.static('/upload'))
+app.use(express.json({ limit: '2000kb' }))
 
 app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -31,7 +31,7 @@ app.use(function (req, res, next) {
 });
 
 const users = [
-    {id: 1, email: 'admin', password: '$2b$10$0EfA6fMFRDVQWzU0WR1dmelPA7.qSp7ZYJAgneGsy2ikQltX2Duey'}
+    {id: 1, email: 'admin', password: 'KartulKartul'}
 ]
 
 let shoes
@@ -179,14 +179,10 @@ function authorizeRequest(req, res, next) {
 
 app.get('/shoes' + '', authorizeRequest, (req, res) => {
 
-    // Get shoes
-    // for user
-    const shoesForUser
-        = shoes
-        .filter(shoe => shoe.userId === req.user.id)
+    // Get shoes for user
+    const shoesForUser = shoes.filter(shoe => shoe.userId === req.user.id)
 
-    // Send shoes
-    // to client
+    // Send shoes to client
     res.send(shoesForUser)
 })
 
@@ -205,13 +201,10 @@ app.post('/shoes' + '', authorizeRequest, (req, res) => {
     if (!req.body.title || !req.body.content || !req.body.brand || !req.body.sizes) return res.status(400).send('Title and content are required')
 
     // Find max id
-    const maxId = shoes
-        .reduce((max, shoe) => shoe.id > max ? shoe.id : max, shoes
-            [0].id)
+    const maxId = shoes.reduce((max, shoe) => shoe.id > max ? shoe.id : max, shoes[0].id)
 
     // Save shoe to database
-    shoes
-        .push({
+    shoes.push({
             id: maxId + 1,
             title: req.body.title,
             content: req.body.content,
@@ -224,30 +217,8 @@ app.post('/shoes' + '', authorizeRequest, (req, res) => {
     // Send shoe to client
     res.status(201).send(shoes
         [shoes.length - 1])
-
 })
 
-// app post image to upload
-app.post('/upload', (req, res) => {
-    // Get the file that was set to our field named "image"
-    const {image} = req.files;
-
-    // If no image submitted, exit
-    if (!image) return res.sendStatus(400);
-
-    if (!/^image/.test(image.mimetype)) return res.sendStatus(400);
-
-
-    // Move the uploaded image to our upload folder
-    image.mv(__dirname + '/upload/' + image.name);
-
-    // All good
-    res.sendStatus(200);
-
-    //console log that uploaded image from uploads folder
-    console.log(__dirname + '/upload/' + image.name);
-
-});
 
 // app delete shoe from database
 app.delete('/shoes/:id', authorizeRequest, (req, res) => {
@@ -263,6 +234,37 @@ app.delete('/shoes/:id', authorizeRequest, (req, res) => {
     shoes.splice(shoes.indexOf(shoe), 1)
 
     res.status(204).end()
+})
+
+app.patch('/shoes/:id', authorizeRequest, (req, res) => {
+    //iterate over all properties in req.body
+    for (const property in req.body) {
+        //check if the property is allowed to be updated
+        if (!['title', 'content', 'brand', 'sizes', 'image'].includes(property))
+            return res.status(400).send('Invalid property: ' + property)
+
+        //Check that the property has a value
+        if (!req.body[property]) return res.status(400).send('Invalid value for property: ' + property)
+
+        //Check that the property is of the correct type
+        if (typeof req.body[property] !== 'string') return res.status(400).send('Invalid type for property: ' + property)
+
+        //Get shoe from database
+        const shoe = shoes.find(shoe => shoe.id === parseInt(req.params.id))
+
+        //Check if the shoe exists
+        if (!shoe) return res.status(404).send('Shoe not found')
+
+        //Check that the shoe belongs to the user
+        if (shoe.userId !== req.user.id) return res.status(401).send('Unauthorized')
+
+        //Update shoe in database
+        shoe[property] = req.body[property]
+
+        //Send shoe to client
+        res.send(shoe)
+
+    }
 })
 
 app.listen(port, () => {

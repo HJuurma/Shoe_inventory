@@ -91,7 +91,7 @@
                     {{ shoe.content }}<br>
 
                     <!--Display uploaded image from upload folder -->
-                    <img :src="'/upload' + shoe.image" alt="shoe image" width="100" height="100"><br>
+                    <img :src="shoe.image" alt="shoe image" width="100" height="100"><br>
 
                     <!-- Delete a shoe -->
                     <button type="button" aria-label="Delete" class="btn btn-primary bg-dark btn-sm" data-bs-toggle="modal"
@@ -200,9 +200,8 @@
                         <label for="addShoeImage" class="col-sm-2 col-form-label">Image</label>
                         <div class="col-sm-10">
 
-                             <form action="/upload" id="addShoeImage" method="POST" enctype="multipart/form-data">
-                                <input type="file" name="image"/>
-                                <input type="submit" value="Upload Image"/>
+                             <form id="addShoeImageForm" method="POST" enctype="multipart/form-data">
+                                <input type="file" name="image" id="addShoeImage"/>
                             </form>
 
                         </div>
@@ -221,36 +220,6 @@
 <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
 
 <script>
-
-    const form = document.getElementById('addShoeImage');
-    const img = document.getElementById('uploadedImage');
-
-    form.addEventListener('submit', (event) => {
-        event.preventDefault(); // prevent the form from submitting normally
-
-        // Create a FormData object and append the file input element to it
-        const formData = new FormData(form);
-        const fileInput = document.querySelector('input[type="file"]');
-        formData.append('image', fileInput.files[0]);
-
-        // Send a POST request to the server to upload the image
-        fetch('/upload', {
-            method: 'POST',
-            body: formData
-        })
-            .then(response => {
-                if (response.ok) {
-                    // If the upload was successful, update the <img> tag to display the uploaded image
-                    img.src = '/upload/' + fileInput.files[0].name;
-                } else {
-                    console.log('Upload failed:', response.status);
-                }
-            })
-            .catch(error => {
-                console.error('Error uploading image:', error);
-            });
-    });
-
     function tryToParseJSON(jsonString) {
         try {
             const o = JSON.parse(jsonString)
@@ -431,18 +400,15 @@
                     if (response.ok) {
                         // Upload shoe image
                         const shoeId = response.body.id
-                        const formData = new FormData()
-                        formData.append('image', this.addShoeImage)
+                        //Get the shoe image from the form
+                        this.addShoeImage = document.getElementById('addShoeImage').files[0]
 
                         // CONVERT image to base64
                         const reader = new FileReader();
                         reader.readAsDataURL(this.addShoeImage);
                         reader.onload = () => {
-                            const base64Image = reader.result.split(',')[1];
-
-                            this.send('PATCH', '/upload/' + shoeId + '/image', {image: base64Image}).then(response => {
+                            this.send('PATCH', '/shoes/' + shoeId, {image: reader.result}).then(response => {
                                 if (response.ok) {
-                                    alert('Shoe added')
                                     this.shoes.push(response.body)
                                     this.modalHandler.hide()
                                 }
