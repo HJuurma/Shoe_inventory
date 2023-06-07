@@ -45,6 +45,7 @@ paths:
       operationId: createUser
       summary: Create a User
       description: Creates a new instance of a `User`.
+
   /sessions:
     summary: Path used to manage the list of sessions.
     description: >-
@@ -58,7 +59,8 @@ paths:
             schema:
               $ref: '#/components/schemas/Credentials'
         required: true
-      tags: /sessions
+      tags:
+        - /sessions
       responses:
         '201':
           content:
